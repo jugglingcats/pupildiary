@@ -1,0 +1,14 @@
+{
+    "prod": {
+        "awscloudformation": {
+            "AuthRoleName": "pupildiary-20190507163912-authRole",
+            "UnauthRoleArn": "arn:aws:iam::986339458627:role/pupildiary-20190507163912-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::986339458627:role/pupildiary-20190507163912-authRole",
+            "Region": "eu-west-1",
+            "DeploymentBucketName": "pupildiary-20190507163912-deployment",
+            "UnauthRoleName": "pupildiary-20190507163912-unauthRole",
+            "StackName": "pupildiary-20190507163912",
+            "StackId": "arn:aws:cloudformation:eu-west-1:986339458627:stack/pupildiary-20190507163912/4346e100-70de-11e9-9fbc-065d51fe97c8"
+        }
+    }
+}

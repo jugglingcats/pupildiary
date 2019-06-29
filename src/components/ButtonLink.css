@@ -1,0 +1,9 @@
+.ui.button.basic.link, .ui.button.basic.link:hover, .ui.button.basic.link:focus {
+    box-shadow: none !important;
+    border: none !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin: 0;
+    display: inline-block !important;
+    color: rgb(65, 131, 196) !important;
+}

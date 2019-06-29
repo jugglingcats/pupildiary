@@ -1,0 +1,25 @@
+.google.button {
+    background-color: rgb(255, 255, 255) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    color: rgba(0, 0, 0, 0.54) !important;
+    box-shadow: rgba(0, 0, 0, 0.24) 0 2px 2px 0, rgba(0, 0, 0, 0.24) 0 0 1px 0 !important;
+    padding: 0 !important;
+    border-radius: 2px !important;
+    border: 1px solid transparent;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    font-family: Roboto, sans-serif !important;
+}
+
+.google.button div {
+    margin-right: 10px;
+    background: rgb(255, 255, 255);
+    padding: 10px;
+    border-radius: 2px;
+}
+
+.google.button span {
+    padding: 10px 10px 10px 0;
+    font-weight: 500;
+}

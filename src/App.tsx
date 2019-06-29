@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+/* eslint-disable */
+
+import React, {useContext} from 'react';
+import {Container, Menu, Message} from "semantic-ui-react";
+import {CalendarList} from "./views/CalendarList";
+import {GoogleAuthWrapper} from "./components/GoogleAuthWrapper";
+import {ErrorContext, ErrorContextProvider} from "./components/ErrorContextProvider";
+import {ReactComponent as Logo} from './pupil.svg';
+
+import "./App.css"
+import {ErrorPopDown} from "./components/ErrorPopDown";
+import ButtonLink from "./components/ButtonLink";
+
+const Test = () => <div>Hello</div>
 
 const App: React.FC = () => {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    const Errors = () => {
+        const errors = useContext(ErrorContext);
+        return <errors.Display/>
+    };
+
+    return (
+        <GoogleAuthWrapper dev={false} loggedIn={false}>
+            <ErrorContextProvider>
+                <Errors/>
+                <Container>
+                    <CalendarList/>
+                </Container>
+            </ErrorContextProvider>
+        </GoogleAuthWrapper>
+    );
+};
 
 export default App;
