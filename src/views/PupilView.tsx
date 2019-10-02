@@ -81,7 +81,7 @@ const BalanceGrid = (props: BalanceGridProps) => {
     </Fragment>;
 };
 
-export const CalendarItem = (props: CalendarItemProps) => {
+export const PupilView = (props: CalendarItemProps) => {
     const errors = useContext(ErrorContext);
 
     const [mode, setMode] = useState<CalendarMode>(CalendarMode.none);

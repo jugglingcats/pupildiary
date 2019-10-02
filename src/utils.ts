@@ -132,3 +132,43 @@ export function events_dl(calendar: gapi.client.calendar.CalendarListEntry, even
 
     return gen_dl(headings, data);
 }
+
+export async function tax_dl(calendarList: gapi.client.calendar.CalendarListEntry[], year: number) {
+    const headings = ["Date", "Pupil", "Lessons", "Payments"];
+
+    const timeMin = new Date(year, 3, 1).toISOString();
+
+    function maxDate() {
+        const now = new Date();
+        const wanted = new Date(year + 1, 3, 1);
+        if (now.getTime() > wanted.getTime()) {
+            return wanted;
+        }
+        return now;
+    }
+
+    let data: any[] = [];
+    for (const calendar of calendarList) {
+        const {amount: amountPerLesson, name} = unpackLocation(calendar);
+
+        // const timeMax = new Date(year + 1, 3, 1).toISOString();
+        const r = await gapi.client.calendar.events.list({
+            calendarId: calendar.id,
+            singleEvents: true,
+            timeMin,
+            timeMax: maxDate().toISOString()
+        });
+
+        const events = r.result.items;
+
+        data = data.concat(events
+            .sort(compareDates)
+            .map(e => {
+                const amount = amountOf(amountPerLesson, e).toString();
+                const date = formatDate(e.start);
+                return isLesson(e) ? [date, name, amount, ""] : [date, name, "", amount];
+            }))
+    }
+    console.log("data", data);
+    return gen_dl(headings, data);
+}

@@ -1,15 +1,18 @@
 /* eslint-disable */
 import React, {useContext, useEffect, useState} from 'react';
-import {Dimmer, Item, Loader, Menu, Message, Responsive} from "semantic-ui-react";
-import {CalendarItem} from "./CalendarItem";
+import {Button, Dimmer, Dropdown, Item, Loader, Menu, Message, Responsive} from "semantic-ui-react";
+import {PupilView} from "./PupilView";
 import {CreateStudent} from "../components/CreateStudent";
 import {ErrorContext} from "../components/ErrorContextProvider";
 import ButtonLink from "../components/ButtonLink";
 import {ReactComponent as Logo} from "../pupil.svg";
+import {ReactComponent as MenuIcon} from "../menu.svg";
+import {TaxReport} from "../components/TaxReport";
 
 export const CalendarList = () => {
     const [calendarList, setCalendarList] = useState<gapi.client.calendar.CalendarListEntry[]>([]);
     const [showCreate, setShowCreate] = useState(false);
+    const [showTaxReports, setShowTaxReports] = useState(false);
     const [busy, setBusy] = useState(false);
     const [activity, setActivity] = useState();
 
@@ -50,7 +53,6 @@ export const CalendarList = () => {
         gapi.client.calendar.calendars.update({
             calendarId: id,
             summary: "Tutoring: " + initials,
-            // location: [name, amount].join("\n") + "\n------\n" + (notes || "")
             location: pack_location(initials, name, nickname, amount, notes)
         }).then(r => {
             setBusy(false);
@@ -94,18 +96,32 @@ export const CalendarList = () => {
                     <Menu.Item>
                         <Logo className="pupil-logo" width={40} height={40}/>
                     </Menu.Item>
-                    <Menu.Item as={Responsive} minWidth={500}>
+                    <Menu.Item as={Responsive} minWidth={300}>
                         <span className="site-menu-title">Pupil Diary</span>
                     </Menu.Item>
                 </Menu.Menu>
-                <Menu.Menu position="right">
+                <Responsive as={Menu.Menu} position="right" maxWidth={800}>
                     <Menu.Item>
-                        {showCreate || <ButtonLink onClick={() => setShowCreate(true)}>New Student</ButtonLink>}
+                        <Dropdown icon={<MenuIcon width={24} height={24}/>}>
+                            <Dropdown.Menu>
+                                <Dropdown.Item text="Tax Reports" onClick={() => setShowTaxReports(true)}/>
+                                <Dropdown.Item text="New Student" onClick={() => setShowCreate(true)}/>
+                                <Dropdown.Item text="Logout" onClick={unauth}/>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </Menu.Item>
+                </Responsive>
+                <Responsive as={Menu.Menu} position="right" minWidth={800}>
+                    <Menu.Item>
+                        <ButtonLink onClick={() => setShowTaxReports(true)}>Tax Reports</ButtonLink>
+                    </Menu.Item>
+                    <Menu.Item>
+                        <ButtonLink onClick={() => setShowCreate(true)}>New Student</ButtonLink>
                     </Menu.Item>
                     <Menu.Item>
                         <ButtonLink onClick={unauth}>Logout</ButtonLink>
                     </Menu.Item>
-                </Menu.Menu>
+                </Responsive>
             </Menu>
 
             <Dimmer active={busy} page={true} inverted>
@@ -115,10 +131,13 @@ export const CalendarList = () => {
             {
                 showCreate && <CreateStudent onCancel={() => setShowCreate(false)} onCreateOrUpdate={createStudent}/>
             }
+            {
+                showTaxReports && <TaxReport calendars={calendarList} onCancel={() => setShowTaxReports(false)}/>
+            }
 
             <Item.Group>
                 {
-                    calendarList.map(c => <CalendarItem key={c.id} calendar={c} onUpdate={(...args) => updateStudent(c.id, ...args)}/>)
+                    calendarList.map(c => <PupilView key={c.id} calendar={c} onUpdate={(...args) => updateStudent(c.id, ...args)}/>)
                 }
                 {
                     !busy && calendarList.length === 0 && !showCreate && <Message>
