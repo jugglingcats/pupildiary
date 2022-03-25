@@ -75,10 +75,23 @@ export function parsePaymentAmount(e: gapi.client.calendar.Event): number {
     return Number(e.extendedProperties.private["paymentAmount"]);
 }
 
+const dateBeforeFilterFactory = (lag) => {
+    return (e: gapi.client.calendar.Event) => {
+        const end = Date.parse((e.end.dateTime || e.end.date) as string);
+        const now = new Date().getTime();
+        return end < now + lag * 3600000;
+    }
+};
+
+export const dateBeforeNowFilter = dateBeforeFilterFactory(0);
+
 export function amountOf(amountPerLesson: number, e: gapi.client.calendar.Event): number {
     if (isLesson(e)) {
-        const overrideAmount = safeGet(e, "overrideAmount", undefined);
-        return overrideAmount === undefined ? -amountPerLesson : -overrideAmount;
+        if ( dateBeforeNowFilter(e) ) {
+            const overrideAmount = safeGet(e, "overrideAmount", undefined);
+            return overrideAmount === undefined ? -amountPerLesson : -overrideAmount;
+        }
+        return 0;
     }
     return parsePaymentAmount(e);
 }

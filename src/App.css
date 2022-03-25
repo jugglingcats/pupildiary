@@ -188,3 +188,11 @@ svg.pupil-logo path {
     /*border is optional*/
     cursor: pointer;
 }
+
+.future-lesson {
+    color: #b6b6b6;
+}
+
+.future-lesson .button-link {
+    color: #b6b6b6;
+}

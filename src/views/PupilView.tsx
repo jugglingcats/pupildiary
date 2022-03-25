@@ -4,7 +4,7 @@ import {Button, Card, Form, Grid, Icon, Label, Loader, Segment} from "semantic-u
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 
 import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css';
-import {amountOf, attempt, compareDates, events_dl, isLesson, parsePaymentAmount, safeGet, unpackLocation} from "../utils";
+import {amountOf, attempt, compareDates, dateBeforeNowFilter, events_dl, isLesson, parsePaymentAmount, safeGet, unpackLocation} from "../utils";
 import moment from "moment";
 import {ErrorContext} from "../components/ErrorContextProvider";
 import {CreateStudent} from "../components/CreateStudent";
@@ -45,8 +45,12 @@ type BalanceGridProps = {
 };
 
 const BalanceGrid = (props: BalanceGridProps) => {
-    const totalPayments = props.events.reduce((tot, e) => isLesson(e) ? tot : (tot + parsePaymentAmount(e)), 0);
-    const totalLessons = props.events.reduce((tot, e) => isLesson(e) ? tot - amountOf(props.amount, e) : tot, 0);
+    const totalPayments = props.events
+        .reduce((tot, e) => isLesson(e) ? tot : (tot + parsePaymentAmount(e)), 0);
+
+    const totalLessons = props.events
+        .filter(dateBeforeNowFilter)
+        .reduce((tot, e) => isLesson(e) ? tot - amountOf(props.amount, e) : tot, 0);
 
     return <Fragment>
         <Grid.Row>
@@ -56,7 +60,7 @@ const BalanceGrid = (props: BalanceGridProps) => {
         </Grid.Row>
         {props.events
             .map(e => (isLesson(e) ?
-                    <Grid.Row key={e.id}>
+                    <Grid.Row key={e.id} className={dateBeforeNowFilter(e) ? "" : "future-lesson"}>
                         <Grid.Column computer={3} mobile={7}>{formatDate(e.start)} {overrideReason(e)}</Grid.Column>
                         <Grid.Column textAlign="right" computer={2} mobile={4}>
                             <LessonEntry event={e} defaultAmount={props.amount} onOverride={(amount, reason) => props.onOverrideLesson(e, amount, reason)}
@@ -189,10 +193,13 @@ export const PupilView = (props: CalendarItemProps) => {
     };
 
     useEffect(() => {
+        const now = new Date();
+        const DAYS_24_IN_MILLIS = 2073600000;
+        const to = new Date(now.getTime() + DAYS_24_IN_MILLIS);
         gapi.client.calendar.events.list({
             calendarId: props.calendar.id,
             singleEvents: true,
-            timeMax: new Date().toISOString()
+            timeMax: to.toISOString()
         }).then(r => {
             setLoading(false);
             populateEvents(r.result.items);
@@ -216,7 +223,7 @@ export const PupilView = (props: CalendarItemProps) => {
 
     return <div className="student">
         <div key="header" onClick={headerClick} className={"student-header-row" + (mode !== CalendarMode.none ? " active" : "")}>
-            <span className="student-name">{name}</span>
+            <span className="student-name">{nickname || name}</span>
             <span style={{whiteSpace: "nowrap"}}>
                     {loading &&
                     <Loader active={true} inline={true} size="tiny"/> ||
@@ -260,10 +267,12 @@ export const PupilView = (props: CalendarItemProps) => {
                                     <Button size="small" basic compact icon="add" labelPosition="right" className="fitted" content="Add Payment"
                                             onClick={() => setShowAddPayment(true)}/>
                                 </Grid.Column>}
-                                <BalanceGrid events={events.sort(compareDates)} amount={amount} onOverrideLesson={overrideLesson} onResetLesson={resetLesson}
-                                             onUpdatePayment={updatePayment} onDeletePayment={deletePayment}/>
-                                {events.length === 0 &&
-                                <div>No lessons or payments found. Please create at least one calendar entry for this student in Google Calendar to get started (for example a recurring appointment), after which past lessons will appear here.</div>
+
+                                {events.length === 0 ?
+                                    <div>No lessons or payments found. Please create at least one calendar entry for this student in Google Calendar to get started (for example a
+                                        recurring appointment), after which past lessons will appear here.</div> :
+                                    <BalanceGrid events={events.sort(compareDates)} amount={amount} onOverrideLesson={overrideLesson} onResetLesson={resetLesson}
+                                                 onUpdatePayment={updatePayment} onDeletePayment={deletePayment}/>
                                 }
                             </Grid>
                             <hr/>
